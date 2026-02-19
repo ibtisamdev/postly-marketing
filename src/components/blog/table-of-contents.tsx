@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { cn } from '@/lib/utils'
+import { cn, slugify } from '@/lib/utils'
 
 // ---------- Types ----------
 
@@ -30,20 +30,6 @@ type TableOfContentsProps = {
 }
 
 // ---------- Helpers ----------
-
-/**
- * Convert a heading string into a URL-friendly slug.
- * Must stay in sync with the slug logic in portable-text.tsx so the
- * generated `id` attributes match the anchor hrefs.
- */
-export function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
 
 /**
  * Extract the plain-text content from a Portable Text block's children.

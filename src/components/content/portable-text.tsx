@@ -4,7 +4,7 @@ import {
 } from '@portabletext/react'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { cn } from '@/lib/utils'
-import { slugify } from '@/components/blog/table-of-contents'
+import { slugify } from '@/lib/utils'
 import { Info, AlertTriangle, Lightbulb, StickyNote } from 'lucide-react'
 
 /** Minimal type for a Portable Text block value used by heading renderers. */
