@@ -25,6 +25,13 @@ export const author = defineType({
       title: 'Avatar',
       type: 'image',
       options: { hotspot: true },
+      fields: [
+        defineField({
+          name: 'alt',
+          title: 'Alt Text',
+          type: 'string',
+        }),
+      ],
     }),
     defineField({
       name: 'role',
@@ -42,6 +49,13 @@ export const author = defineType({
       title: 'Social Links',
       type: 'array',
       of: [defineArrayMember({ type: 'socialLink' })],
+    }),
+    defineField({
+      name: 'teamMember',
+      title: 'Team Member',
+      type: 'reference',
+      to: [{ type: 'teamMember' }],
+      description: 'Link to corresponding team member profile, if applicable',
     }),
   ],
   preview: {

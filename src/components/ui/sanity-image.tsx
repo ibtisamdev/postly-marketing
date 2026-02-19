@@ -35,10 +35,19 @@ export function SanityImage({
         )
       : Math.round(width / 1.5))
 
+  let builder = urlFor(value).width(width).height(computedHeight)
+
+  if (value.hotspot) {
+    builder = builder
+      .fit('crop')
+      .crop('focalpoint')
+      .focalPoint(value.hotspot.x ?? 0.5, value.hotspot.y ?? 0.5)
+  }
+
   return (
     <Image
       className={className}
-      src={urlFor(value).width(width).height(computedHeight).url()}
+      src={builder.url()}
       alt={value.alt || ''}
       width={width}
       height={computedHeight}

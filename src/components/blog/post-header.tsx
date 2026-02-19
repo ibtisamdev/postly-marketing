@@ -21,6 +21,7 @@ type PostHeaderProps = {
         color: string | null
       }[]
     | null
+  readingTime?: number
 }
 
 export function PostHeader({
@@ -30,6 +31,7 @@ export function PostHeader({
   coverImage,
   author,
   categories,
+  readingTime,
 }: PostHeaderProps) {
   return (
     <header className="mb-10">
@@ -59,11 +61,19 @@ export function PostHeader({
           {author?.name && (
             <p className="font-medium text-foreground">{author.name}</p>
           )}
-          {publishedAt && (
-            <time dateTime={publishedAt} className="text-muted">
-              {formatDate(publishedAt)}
-            </time>
-          )}
+          <div className="flex items-center gap-1.5 text-muted">
+            {publishedAt && (
+              <time dateTime={publishedAt}>
+                {formatDate(publishedAt)}
+              </time>
+            )}
+            {publishedAt && readingTime ? (
+              <span aria-hidden="true">&middot;</span>
+            ) : null}
+            {readingTime ? (
+              <span>{readingTime} min read</span>
+            ) : null}
+          </div>
         </div>
       </div>
       {coverImage && (

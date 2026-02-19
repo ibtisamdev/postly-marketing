@@ -1,12 +1,5 @@
 import { Section } from '@/components/ui/section'
-import { Users, Globe, Calendar, TrendingUp } from 'lucide-react'
-
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  Users,
-  Globe,
-  Calendar,
-  TrendingUp,
-}
+import { getIcon } from '@/lib/icon-map'
 
 type StatsItem = {
   _id: string
@@ -15,14 +8,21 @@ type StatsItem = {
   icon: string | null
 }
 
-export function StatsBar({ stats }: { stats: StatsItem[] }) {
+type StatsBarProps = {
+  eyebrow?: string | null
+  title?: string | null
+  description?: string | null
+  stats: StatsItem[]
+}
+
+export function StatsBar({ stats }: StatsBarProps) {
   if (!stats.length) return null
 
   return (
     <Section className="bg-primary-600 text-white dark:bg-primary-900">
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => {
-          const Icon = stat.icon ? iconMap[stat.icon] : null
+          const Icon = getIcon(stat.icon)
           return (
             <div key={stat._id} className="text-center">
               {Icon && (

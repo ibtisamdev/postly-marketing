@@ -12,6 +12,7 @@ import {
 
 const LISTED_TYPES = [
   'siteSettings',
+  'page',
   'blogPost',
   'author',
   'category',
@@ -40,6 +41,48 @@ export const structure: StructureResolver = (S) =>
             .schemaType('siteSettings')
             .documentId('siteSettings')
             .title('Site Settings'),
+        ),
+
+      S.divider(),
+
+      // Pages (Page Builder)
+      S.listItem()
+        .title('Pages')
+        .icon(DocumentIcon)
+        .child(
+          S.list()
+            .title('Pages')
+            .items([
+              S.listItem()
+                .title('Home')
+                .icon(DocumentIcon)
+                .child(
+                  S.documentList()
+                    .title('Home')
+                    .schemaType('page')
+                    .filter('_type == "page" && slug.current == "home"'),
+                ),
+              S.listItem()
+                .title('About')
+                .icon(DocumentIcon)
+                .child(
+                  S.documentList()
+                    .title('About')
+                    .schemaType('page')
+                    .filter('_type == "page" && slug.current == "about"'),
+                ),
+              S.listItem()
+                .title('Contact')
+                .icon(DocumentIcon)
+                .child(
+                  S.documentList()
+                    .title('Contact')
+                    .schemaType('page')
+                    .filter('_type == "page" && slug.current == "contact"'),
+                ),
+              S.divider(),
+              S.documentTypeListItem('page').title('All Pages'),
+            ]),
         ),
 
       S.divider(),

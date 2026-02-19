@@ -1,12 +1,22 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { sanityFetch } from '@/sanity/lib/live'
-import { LEGAL_PAGE_BY_SLUG_QUERY } from '@/sanity/lib/queries'
+import { LEGAL_PAGE_BY_SLUG_QUERY, LEGAL_SLUGS_QUERY } from '@/sanity/lib/queries'
 import { Section } from '@/components/ui/section'
 import { PortableText } from '@/components/content/portable-text'
 import { formatDate } from '@/lib/utils'
 
 type Props = { params: Promise<{ slug: string }> }
+
+export async function generateStaticParams() {
+  const { data } = await sanityFetch({
+    query: LEGAL_SLUGS_QUERY,
+    perspective: 'published',
+    stega: false,
+  })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return ((data as any[]) ?? []).map((p: { slug?: string }) => ({ slug: p.slug! }))
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params

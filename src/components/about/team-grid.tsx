@@ -30,16 +30,30 @@ type TeamMember = {
     | null
 }
 
-export function TeamGrid({ members }: { members: TeamMember[] }) {
+type TeamGridProps = {
+  eyebrow?: string | null
+  title: string | null
+  description?: string | null
+  members: TeamMember[]
+}
+
+export function TeamGrid({
+  eyebrow,
+  title,
+  description,
+  members,
+}: TeamGridProps) {
   if (!members.length) return null
 
   return (
     <Section>
-      <Heading
-        eyebrow="Our Team"
-        title="The people behind Postly"
-        description="A small but mighty team passionate about helping you grow."
-      />
+      {title && (
+        <Heading
+          eyebrow={eyebrow ?? undefined}
+          title={title}
+          description={description ?? undefined}
+        />
+      )}
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {members.map((member) => (
           <div key={member._id} className="text-center">

@@ -1,14 +1,29 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { sanityFetch } from '@/sanity/lib/live'
-import { CASE_STUDY_BY_SLUG_QUERY } from '@/sanity/lib/queries'
+import {
+  CASE_STUDY_BY_SLUG_QUERY,
+  CASE_STUDY_SLUGS_QUERY,
+  CASE_STUDY_RELATED_QUERY,
+} from '@/sanity/lib/queries'
 import { Section } from '@/components/ui/section'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { Badge } from '@/components/ui/badge'
 import { PortableText } from '@/components/content/portable-text'
+import { RelatedCaseStudies } from '@/components/case-studies/related-case-studies'
 import { Quote } from 'lucide-react'
 
 type Props = { params: Promise<{ slug: string }> }
+
+export async function generateStaticParams() {
+  const { data } = await sanityFetch({
+    query: CASE_STUDY_SLUGS_QUERY,
+    perspective: 'published',
+    stega: false,
+  })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return ((data as any[]) ?? []).map((p: { slug?: string }) => ({ slug: p.slug! }))
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
@@ -37,6 +52,18 @@ export default async function CaseStudyPage({ params }: Props) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const study = data as any
+
+  const { data: relatedData } = await sanityFetch({
+    query: CASE_STUDY_RELATED_QUERY,
+    params: { slug, industry: study.industry ?? '' },
+  })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const relatedStudies = (relatedData ?? []) as any[]
+
+  // Prefer testimonial reference, fall back to deprecated flat fields
+  const testimonialQuote = study.testimonial?.quote ?? study.testimonialQuote
+  const testimonialName = study.testimonial?.name ?? study.testimonialAuthor
+  const testimonialRole = study.testimonial?.role ?? study.testimonialRole
 
   return (
     <Section>
@@ -117,21 +144,27 @@ export default async function CaseStudyPage({ params }: Props) {
           </div>
         )}
 
-        {study.testimonialQuote && (
+        {testimonialQuote && (
           <blockquote className="my-10 rounded-xl bg-primary-50 p-8 dark:bg-primary-950/20">
             <Quote className="mb-3 h-8 w-8 text-primary-300" />
             <p className="mb-4 text-lg italic text-foreground">
-              &ldquo;{study.testimonialQuote}&rdquo;
+              &ldquo;{testimonialQuote}&rdquo;
             </p>
-            {(study.testimonialAuthor || study.testimonialRole) && (
+            {(testimonialName || testimonialRole) && (
               <footer className="text-sm text-muted">
-                {study.testimonialAuthor}
-                {study.testimonialRole ? `, ${study.testimonialRole}` : ''}
+                {testimonialName}
+                {testimonialRole ? `, ${testimonialRole}` : ''}
               </footer>
             )}
           </blockquote>
         )}
       </article>
+
+      {relatedStudies.length > 0 && (
+        <div className="mt-20">
+          <RelatedCaseStudies studies={relatedStudies} />
+        </div>
+      )}
     </Section>
   )
 }

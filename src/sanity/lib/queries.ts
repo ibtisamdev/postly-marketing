@@ -31,6 +31,11 @@ export const SITE_SETTINGS_QUERY = defineQuery(`
       href,
       url
     },
+    footerColumns[]{
+      _key,
+      heading,
+      links[]{ _key, label, linkType, href, url }
+    },
     footerLinks1 {
       heading,
       links[]{ _key, label, linkType, href, url }
@@ -63,47 +68,87 @@ export const SITE_SETTINGS_QUERY = defineQuery(`
 `)
 
 // ============================================================
-// Homepage
+// Page Builder
 // ============================================================
 
-export const HOMEPAGE_FEATURES_QUERY = defineQuery(`
-  *[_type == "feature"] | order(order asc) [0...9] {
-    _id,
-    title,
-    description,
-    icon,
-    "slug": slug.current
-  }
-`)
-
-export const HOMEPAGE_TESTIMONIALS_QUERY = defineQuery(`
-  *[_type == "testimonial" && featured == true] | order(_createdAt desc) [0...6] {
-    _id,
-    quote,
-    name,
-    role,
-    company,
-    avatar { ${imageFragment} }
-  }
-`)
-
-export const HOMEPAGE_INTEGRATIONS_QUERY = defineQuery(`
-  *[_type == "integration"] | order(name asc) {
-    _id,
-    name,
-    logo { ${imageFragment} },
-    description,
-    url,
-    category
-  }
-`)
-
-export const HOMEPAGE_STATS_QUERY = defineQuery(`
-  *[_type == "statsItem"] | order(order asc) {
-    _id,
-    label,
-    value,
-    icon
+export const PAGE_BUILDER_QUERY = defineQuery(`
+  {
+    "page": *[_type == "page" && slug.current == $slug][0]{
+      _id,
+      title,
+      "slug": slug.current,
+      sections[]{
+        ...,
+        _type == "sectionRichText" => {
+          ...,
+          body[]{
+            ...,
+            _type == "pteImage" => {
+              ...,
+              image { ${imageFragment} }
+            }
+          }
+        },
+        _type == "sectionHero" => {
+          ...,
+          backgroundImage { ${imageFragment} },
+          cta1 { label, linkType, href, url },
+          cta2 { label, linkType, href, url }
+        },
+        _type == "sectionCta" => {
+          ...,
+          ctaPrimary { label, linkType, href, url },
+          ctaSecondary { label, linkType, href, url }
+        },
+        _type == "sectionContactForm" => {
+          ...,
+          contactInfo[]{
+            _key,
+            icon,
+            label,
+            value
+          },
+          formLabels {
+            nameLabel,
+            namePlaceholder,
+            emailLabel,
+            emailPlaceholder,
+            companyLabel,
+            companyPlaceholder,
+            messageLabel,
+            messagePlaceholder,
+            submitLabel,
+            submittingLabel,
+            successMessage
+          }
+        },
+        _type == "sectionOpenPositions" => {
+          ...,
+          link { label, linkType, href, url }
+        }
+      },
+      seo {
+        title,
+        description,
+        image { ${imageFragment} },
+        noIndex
+      }
+    },
+    "features": *[_type == "feature"] | order(order asc)[0...9]{
+      _id, title, description, icon, "slug": slug.current
+    },
+    "testimonials": *[_type == "testimonial" && featured == true] | order(_createdAt desc)[0...6]{
+      _id, quote, name, role, company, avatar { ${imageFragment} }
+    },
+    "integrations": *[_type == "integration"] | order(name asc)[0...20]{
+      _id, name, logo { ${imageFragment} }, description, url, category
+    },
+    "stats": *[_type == "statsItem"] | order(order asc){
+      _id, label, value, icon
+    },
+    "teamMembers": *[_type == "teamMember"] | order(order asc){
+      _id, name, role, bio, photo { ${imageFragment} }, socialLinks[]{ _key, platform, url }
+    }
   }
 `)
 
@@ -165,7 +210,7 @@ export const BLOG_CATEGORIES_QUERY = defineQuery(`
 `)
 
 export const BLOG_RELATED_POSTS_QUERY = defineQuery(`
-  *[_type == "blogPost" && slug.current != $slug && count(categories[@._ref in $categoryIds]) > 0] | order(publishedAt desc) [0...3] {
+  *[_type == "blogPost" && slug.current != $slug && count(categories[@._ref in $categoryIds]) > 0 && defined(publishedAt)] | order(publishedAt desc) [0...3] {
     _id,
     title,
     "slug": slug.current,
@@ -187,13 +232,6 @@ export const FEATURES_QUERY = defineQuery(`
     "slug": slug.current,
     description,
     icon,
-    detailedDescription[]{
-      ...,
-      _type == "pteImage" => {
-        ...,
-        image { ${imageFragment} }
-      }
-    },
     screenshot { ${imageFragment} },
     order
   }
@@ -255,10 +293,22 @@ export const CASE_STUDY_BY_SLUG_QUERY = defineQuery(`
     industry,
     featured,
     coverImage { ${imageFragment} },
-    challenge,
-    solution,
-    results,
+    challenge[]{
+      ...,
+      _type == "pteImage" => { ..., image { ${imageFragment} } }
+    },
+    solution[]{
+      ...,
+      _type == "pteImage" => { ..., image { ${imageFragment} } }
+    },
+    results[]{
+      ...,
+      _type == "pteImage" => { ..., image { ${imageFragment} } }
+    },
     metrics[]{ _key, label, value, icon },
+    companySize,
+    platformsUsed,
+    testimonial->{ _id, quote, name, role, company, avatar { ${imageFragment} } },
     testimonialQuote,
     testimonialAuthor,
     testimonialRole,
@@ -276,7 +326,7 @@ export const CASE_STUDY_BY_SLUG_QUERY = defineQuery(`
 // ============================================================
 
 export const CHANGELOG_ENTRIES_QUERY = defineQuery(`
-  *[_type == "changelogEntry"] | order(date desc) {
+  *[_type == "changelogEntry"] | order(date desc) [0...50] {
     _id,
     title,
     version,
@@ -370,4 +420,35 @@ export const SITEMAP_QUERY = defineQuery(`
     ),
     _updatedAt
   }
+`)
+
+// ============================================================
+// Slug Queries (for generateStaticParams)
+// ============================================================
+
+export const PAGE_SLUGS_QUERY = defineQuery(`
+  *[_type == "page" && defined(slug.current)]{ "slug": slug.current }
+`)
+
+export const BLOG_SLUGS_QUERY = defineQuery(`
+  *[_type == "blogPost" && defined(slug.current)]{ "slug": slug.current }
+`)
+
+export const CASE_STUDY_SLUGS_QUERY = defineQuery(`
+  *[_type == "caseStudy" && defined(slug.current)]{ "slug": slug.current }
+`)
+
+export const CASE_STUDY_RELATED_QUERY = defineQuery(`
+  *[_type == "caseStudy" && slug.current != $slug && industry == $industry][0...3]{
+    _id,
+    title,
+    "slug": slug.current,
+    companyName,
+    industry,
+    coverImage { ${imageFragment} }
+  }
+`)
+
+export const LEGAL_SLUGS_QUERY = defineQuery(`
+  *[_type == "legalPage" && defined(slug.current)]{ "slug": slug.current }
 `)

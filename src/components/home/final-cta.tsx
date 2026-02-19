@@ -1,25 +1,62 @@
 import { Section } from '@/components/ui/section'
 import { Button } from '@/components/ui/button'
+import { stegaClean } from '@sanity/client/stega'
 
-export function FinalCta() {
+type LinkValue = {
+  label?: string | null
+  linkType?: string | null
+  href?: string | null
+  url?: string | null
+} | null
+
+export type FinalCtaProps = {
+  title?: string | null
+  description?: string | null
+  ctaPrimary?: LinkValue
+  ctaSecondary?: LinkValue
+}
+
+function getHref(link?: LinkValue): string | undefined {
+  if (!link) return undefined
+  const linkType = stegaClean(link.linkType)
+  return (linkType === 'external' ? link.url : link.href) ?? undefined
+}
+
+export function FinalCta({
+  title,
+  description,
+  ctaPrimary,
+  ctaSecondary,
+}: FinalCtaProps) {
   return (
     <Section className="text-center">
       <div className="mx-auto max-w-2xl">
-        <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          Ready to level up your social media?
-        </h2>
-        <p className="mt-4 text-lg text-muted">
-          Join thousands of marketers who save hours every week with Postly.
-          Start your free trial today.
-        </p>
-        <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-          <Button href="/pricing" size="lg">
-            Get Started Free
-          </Button>
-          <Button href="/contact" variant="outline" size="lg">
-            Talk to Sales
-          </Button>
-        </div>
+        {title && (
+          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            {title}
+          </h2>
+        )}
+        {description && (
+          <p className="mt-4 text-lg text-muted">{description}</p>
+        )}
+        {(ctaPrimary?.label || ctaSecondary?.label) && (
+          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+            {ctaPrimary?.label && (
+              <Button href={getHref(ctaPrimary)} size="lg">
+                {ctaPrimary.label}
+              </Button>
+            )}
+            {ctaSecondary?.label && (
+              <Button
+                href={getHref(ctaSecondary)}
+                variant="outline"
+                size="lg"
+              >
+                {ctaSecondary.label}
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </Section>
   )

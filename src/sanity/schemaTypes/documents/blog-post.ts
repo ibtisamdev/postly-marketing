@@ -6,17 +6,24 @@ export const blogPost = defineType({
   title: 'Blog Post',
   type: 'document',
   icon: DocumentTextIcon,
+  groups: [
+    { name: 'content', title: 'Content', default: true },
+    { name: 'metadata', title: 'Metadata' },
+    { name: 'seo', title: 'SEO' },
+  ],
   fields: [
     defineField({
       name: 'title',
       title: 'Title',
       type: 'string',
+      group: 'content',
       validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'slug',
       title: 'Slug',
       type: 'slug',
+      group: 'content',
       options: { source: 'title', maxLength: 96 },
       validation: (rule) => rule.required(),
     }),
@@ -24,6 +31,7 @@ export const blogPost = defineType({
       name: 'excerpt',
       title: 'Excerpt',
       type: 'text',
+      group: 'content',
       rows: 3,
       validation: (rule) =>
         rule.max(200).warning('Keep under 200 characters'),
@@ -32,6 +40,7 @@ export const blogPost = defineType({
       name: 'coverImage',
       title: 'Cover Image',
       type: 'image',
+      group: 'content',
       options: { hotspot: true },
       fields: [
         defineField({
@@ -45,6 +54,7 @@ export const blogPost = defineType({
       name: 'body',
       title: 'Body',
       type: 'array',
+      group: 'content',
       of: [
         defineArrayMember({
           type: 'block',
@@ -92,12 +102,14 @@ export const blogPost = defineType({
       name: 'author',
       title: 'Author',
       type: 'reference',
+      group: 'metadata',
       to: [{ type: 'author' }],
     }),
     defineField({
       name: 'categories',
       title: 'Categories',
       type: 'array',
+      group: 'metadata',
       of: [
         defineArrayMember({ type: 'reference', to: [{ type: 'category' }] }),
       ],
@@ -106,11 +118,14 @@ export const blogPost = defineType({
       name: 'publishedAt',
       title: 'Published At',
       type: 'datetime',
+      group: 'metadata',
+      description: 'Posts without a date won\'t appear on the blog',
     }),
     defineField({
       name: 'seo',
       title: 'SEO',
       type: 'seo',
+      group: 'seo',
     }),
   ],
   preview: {

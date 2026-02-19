@@ -8,6 +8,7 @@ import { Section } from '@/components/ui/section'
 import { Heading } from '@/components/ui/heading'
 import { PostCard } from '@/components/blog/post-card'
 import { Pagination } from '@/components/blog/pagination'
+import { BlogSearch } from '@/components/blog/blog-search'
 
 export const metadata: Metadata = {
   title: 'Blog — Postly',
@@ -41,6 +42,13 @@ export default async function BlogPage({
     (typeof totalCount === 'number' ? totalCount : 0) / POSTS_PER_PAGE,
   )
 
+  const searchPosts = postList.map((p) => ({
+    _id: p._id as string,
+    title: p.title as string,
+    slug: p.slug as string,
+    excerpt: p.excerpt as string | null,
+  }))
+
   return (
     <Section>
       <Heading
@@ -48,6 +56,9 @@ export default async function BlogPage({
         title="Latest articles"
         description="Tips, guides, and insights on social media marketing."
       />
+      <div className="mb-8 max-w-md">
+        <BlogSearch posts={searchPosts} />
+      </div>
       {postList.length > 0 ? (
         <>
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">

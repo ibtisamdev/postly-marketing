@@ -30,20 +30,30 @@ type Testimonial = {
   } | null
 }
 
-export function TestimonialsCarousel({
-  testimonials,
-}: {
+type TestimonialsCarouselProps = {
+  eyebrow?: string | null
+  title: string | null
+  description?: string | null
   testimonials: Testimonial[]
-}) {
+}
+
+export function TestimonialsCarousel({
+  eyebrow,
+  title,
+  description,
+  testimonials,
+}: TestimonialsCarouselProps) {
   if (!testimonials.length) return null
 
   return (
     <Section className="bg-primary-50/30 dark:bg-primary-950/10">
-      <Heading
-        eyebrow="Testimonials"
-        title="Loved by teams everywhere"
-        description="See what our customers have to say about Postly."
-      />
+      {title && (
+        <Heading
+          eyebrow={eyebrow ?? undefined}
+          title={title}
+          description={description ?? undefined}
+        />
+      )}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {testimonials.map((t) => (
           <Card key={t._id} className="relative">
