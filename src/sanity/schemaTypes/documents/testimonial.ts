@@ -35,11 +35,19 @@ export const testimonial = defineType({
       title: 'Avatar',
       type: 'image',
       options: { hotspot: true },
+      fields: [
+        defineField({
+          name: 'alt',
+          title: 'Alt Text',
+          type: 'string',
+        }),
+      ],
     }),
     defineField({
       name: 'featured',
       title: 'Featured',
       type: 'boolean',
+      description: 'Only featured testimonials appear on the homepage',
       initialValue: false,
     }),
   ],

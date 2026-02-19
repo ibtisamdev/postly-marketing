@@ -5,12 +5,26 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 
+type FormLabels = {
+  nameLabel?: string | null
+  namePlaceholder?: string | null
+  emailLabel?: string | null
+  emailPlaceholder?: string | null
+  companyLabel?: string | null
+  companyPlaceholder?: string | null
+  messageLabel?: string | null
+  messagePlaceholder?: string | null
+  submitLabel?: string | null
+  submittingLabel?: string | null
+  successMessage?: string | null
+}
+
 type FormState = {
   status: 'idle' | 'loading' | 'success' | 'error'
   message?: string
 }
 
-export function ContactForm() {
+export function ContactForm({ labels }: { labels?: FormLabels }) {
   const [state, setState] = useState<FormState>({ status: 'idle' })
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -37,7 +51,12 @@ export function ContactForm() {
         throw new Error(data.error || 'Something went wrong')
       }
 
-      setState({ status: 'success', message: 'Message sent! We will get back to you soon.' })
+      setState({
+        status: 'success',
+        message:
+          labels?.successMessage ||
+          'Message sent! We will get back to you soon.',
+      })
       form.reset()
     } catch (err) {
       setState({
@@ -55,13 +74,13 @@ export function ContactForm() {
             htmlFor="name"
             className="mb-1.5 block text-sm font-medium text-foreground"
           >
-            Name
+            {labels?.nameLabel || 'Name'}
           </label>
           <Input
             id="name"
             name="name"
             required
-            placeholder="Your name"
+            placeholder={labels?.namePlaceholder || 'Your name'}
           />
         </div>
         <div>
@@ -69,14 +88,14 @@ export function ContactForm() {
             htmlFor="email"
             className="mb-1.5 block text-sm font-medium text-foreground"
           >
-            Email
+            {labels?.emailLabel || 'Email'}
           </label>
           <Input
             id="email"
             name="email"
             type="email"
             required
-            placeholder="you@company.com"
+            placeholder={labels?.emailPlaceholder || 'you@company.com'}
           />
         </div>
       </div>
@@ -85,12 +104,12 @@ export function ContactForm() {
           htmlFor="company"
           className="mb-1.5 block text-sm font-medium text-foreground"
         >
-          Company (optional)
+          {labels?.companyLabel || 'Company (optional)'}
         </label>
         <Input
           id="company"
           name="company"
-          placeholder="Your company"
+          placeholder={labels?.companyPlaceholder || 'Your company'}
         />
       </div>
       <div>
@@ -98,13 +117,13 @@ export function ContactForm() {
           htmlFor="message"
           className="mb-1.5 block text-sm font-medium text-foreground"
         >
-          Message
+          {labels?.messageLabel || 'Message'}
         </label>
         <Textarea
           id="message"
           name="message"
           required
-          placeholder="How can we help?"
+          placeholder={labels?.messagePlaceholder || 'How can we help?'}
         />
       </div>
       <Button
@@ -112,14 +131,20 @@ export function ContactForm() {
         disabled={state.status === 'loading'}
         className="w-full sm:w-auto"
       >
-        {state.status === 'loading' ? 'Sending...' : 'Send Message'}
+        {state.status === 'loading'
+          ? labels?.submittingLabel || 'Sending...'
+          : labels?.submitLabel || 'Send Message'}
       </Button>
-      {state.status === 'success' && (
-        <p className="text-sm text-green-600">{state.message}</p>
-      )}
-      {state.status === 'error' && (
-        <p className="text-sm text-red-600">{state.message}</p>
-      )}
+      <div aria-live="polite" aria-atomic="true">
+        {state.status === 'success' && (
+          <p className="text-sm text-green-600">{state.message}</p>
+        )}
+        {state.status === 'error' && (
+          <p className="text-sm text-red-600" role="alert">
+            {state.message}
+          </p>
+        )}
+      </div>
     </form>
   )
 }

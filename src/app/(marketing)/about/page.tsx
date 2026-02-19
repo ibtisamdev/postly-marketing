@@ -1,39 +1,47 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { sanityFetch } from '@/sanity/lib/live'
-import {
-  TEAM_MEMBERS_QUERY,
-  HOMEPAGE_STATS_QUERY,
-} from '@/sanity/lib/queries'
-import { Mission } from '@/components/about/mission'
-import { Values } from '@/components/about/values'
-import { TeamGrid } from '@/components/about/team-grid'
-import { StatsBar } from '@/components/home/stats-bar'
-import { FinalCta } from '@/components/home/final-cta'
+import { PAGE_BUILDER_QUERY } from '@/sanity/lib/queries'
+import { SectionRenderer } from '@/components/page-builder/section-renderer'
 
-export const metadata: Metadata = {
-  title: 'About — Postly',
-  description:
-    'Learn about the team and mission behind Postly, the social media management platform built for modern marketers.',
+export async function generateMetadata(): Promise<Metadata> {
+  const { data } = await sanityFetch({
+    query: PAGE_BUILDER_QUERY,
+    params: { slug: 'about' },
+  })
+
+  const seo = data?.page?.seo
+
+  return {
+    title: seo?.title || 'About — Postly',
+    description:
+      seo?.description ||
+      'Learn about the team and mission behind Postly, the social media management platform built for modern marketers.',
+    ...(seo?.noIndex && { robots: { index: false, follow: false } }),
+  }
 }
 
 export default async function AboutPage() {
-  const [membersRes, statsRes] = await Promise.all([
-    sanityFetch({ query: TEAM_MEMBERS_QUERY }),
-    sanityFetch({ query: HOMEPAGE_STATS_QUERY }),
-  ])
+  const { data } = await sanityFetch({
+    query: PAGE_BUILDER_QUERY,
+    params: { slug: 'about' },
+  })
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  const members = (membersRes.data ?? []) as any[]
-  const stats = (statsRes.data ?? []) as any[]
-  /* eslint-enable @typescript-eslint/no-explicit-any */
+  if (!data?.page) notFound()
+
+  const { page, features, testimonials, integrations, stats, teamMembers } =
+    data
 
   return (
-    <>
-      <Mission />
-      <Values />
-      <TeamGrid members={members} />
-      <StatsBar stats={stats} />
-      <FinalCta />
-    </>
+    <SectionRenderer
+      sections={page.sections}
+      data={{
+        features: features ?? [],
+        testimonials: testimonials ?? [],
+        integrations: integrations ?? [],
+        stats: stats ?? [],
+        teamMembers: teamMembers ?? [],
+      }}
+    />
   )
 }

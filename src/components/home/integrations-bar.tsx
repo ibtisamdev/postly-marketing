@@ -28,20 +28,30 @@ type Integration = {
   category: string | null
 }
 
-export function IntegrationsBar({
-  integrations,
-}: {
+type IntegrationsBarProps = {
+  eyebrow?: string | null
+  title: string | null
+  description?: string | null
   integrations: Integration[]
-}) {
+}
+
+export function IntegrationsBar({
+  eyebrow,
+  title,
+  description,
+  integrations,
+}: IntegrationsBarProps) {
   if (!integrations.length) return null
 
   return (
     <Section>
-      <Heading
-        eyebrow="Integrations"
-        title="Works with your favorite platforms"
-        description="Connect all the social networks and tools you already use."
-      />
+      {title && (
+        <Heading
+          eyebrow={eyebrow ?? undefined}
+          title={title}
+          description={description ?? undefined}
+        />
+      )}
       <div className="flex flex-wrap items-center justify-center gap-8">
         {integrations.map((integration) => (
           <div

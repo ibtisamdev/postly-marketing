@@ -30,6 +30,13 @@ export const teamMember = defineType({
       title: 'Photo',
       type: 'image',
       options: { hotspot: true },
+      fields: [
+        defineField({
+          name: 'alt',
+          title: 'Alt Text',
+          type: 'string',
+        }),
+      ],
     }),
     defineField({
       name: 'socialLinks',

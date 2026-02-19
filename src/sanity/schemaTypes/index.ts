@@ -12,7 +12,24 @@ import { pteImage } from './blocks/pte-image'
 import { pteCallout } from './blocks/pte-callout'
 import { pteCode } from './blocks/pte-code'
 
+// Section types (Page Builder)
+import { sectionHero } from './sections/section-hero'
+import { sectionPainPoints } from './sections/section-pain-points'
+import { sectionFeaturesGrid } from './sections/section-features-grid'
+import { sectionStatsBar } from './sections/section-stats-bar'
+import { sectionTestimonials } from './sections/section-testimonials'
+import { sectionIntegrations } from './sections/section-integrations'
+import { sectionCta } from './sections/section-cta'
+import { sectionMission } from './sections/section-mission'
+import { sectionValues } from './sections/section-values'
+import { sectionTeamGrid } from './sections/section-team-grid'
+import { sectionContactForm } from './sections/section-contact-form'
+import { sectionFaq } from './sections/section-faq'
+import { sectionRichText } from './sections/section-rich-text'
+import { sectionOpenPositions } from './sections/section-open-positions'
+
 // Document types
+import { page } from './documents/page'
 import { blogPost } from './documents/blog-post'
 import { author } from './documents/author'
 import { category } from './documents/category'
@@ -40,7 +57,23 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     pteImage,
     pteCallout,
     pteCode,
+    // Sections (Page Builder)
+    sectionHero,
+    sectionPainPoints,
+    sectionFeaturesGrid,
+    sectionStatsBar,
+    sectionTestimonials,
+    sectionIntegrations,
+    sectionCta,
+    sectionMission,
+    sectionValues,
+    sectionTeamGrid,
+    sectionContactForm,
+    sectionFaq,
+    sectionRichText,
+    sectionOpenPositions,
     // Documents
+    page,
     blogPost,
     author,
     category,

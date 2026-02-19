@@ -3,6 +3,7 @@ import { sanityFetch } from '@/sanity/lib/live'
 import { SITE_SETTINGS_QUERY } from '@/sanity/lib/queries'
 
 type LinkGroup = {
+  _key?: string
   heading: string | null
   links: Array<{
     _key: string
@@ -66,14 +67,23 @@ export async function Footer() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const settings = data as any
 
+  const columns: LinkGroup[] =
+    settings?.footerColumns?.length > 0
+      ? settings.footerColumns
+      : [
+          settings?.footerLinks1,
+          settings?.footerLinks2,
+          settings?.footerLinks3,
+          settings?.footerLinks4,
+        ].filter(Boolean)
+
   return (
     <footer className="border-t border-border bg-background">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-          <FooterLinkGroup group={settings?.footerLinks1} />
-          <FooterLinkGroup group={settings?.footerLinks2} />
-          <FooterLinkGroup group={settings?.footerLinks3} />
-          <FooterLinkGroup group={settings?.footerLinks4} />
+        <div className={`grid grid-cols-2 gap-8 md:grid-cols-${Math.min(columns.length, 4)}`}>
+          {columns.map((col, i) => (
+            <FooterLinkGroup key={col?._key ?? `col-${i}`} group={col} />
+          ))}
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 sm:flex-row">

@@ -4,7 +4,26 @@ import {
 } from '@portabletext/react'
 import { SanityImage } from '@/components/ui/sanity-image'
 import { cn } from '@/lib/utils'
+import { slugify } from '@/lib/utils'
 import { Info, AlertTriangle, Lightbulb, StickyNote } from 'lucide-react'
+
+/** Minimal type for a Portable Text block value used by heading renderers. */
+type PTBlockValue = {
+  _type: string
+  children?: { _type: string; text?: string }[]
+}
+
+/**
+ * Extract plain text from a Portable Text block's children array
+ * so we can generate a deterministic slug for heading anchors.
+ */
+function headingId(value: PTBlockValue): string {
+  const text = (value.children ?? [])
+    .filter((c) => c._type === 'span')
+    .map((s) => s.text ?? '')
+    .join('')
+  return slugify(text)
+}
 
 const toneConfig: Record<
   string,
@@ -51,27 +70,35 @@ const components: PortableTextComponents = {
         </aside>
       )
     },
-    pteCode: ({ value }: { value: { language?: string; filename?: string; code?: string } }) => (
-      <div className="my-6 overflow-hidden rounded-lg border border-border">
-        {(value.filename || value.language) && (
-          <div className="flex items-center gap-2 border-b border-border bg-gray-50 px-4 py-2 dark:bg-gray-900">
-            {value.filename && (
-              <span className="text-xs font-medium text-foreground">
-                {value.filename}
-              </span>
-            )}
-            {value.language && (
-              <span className="ml-auto text-xs text-muted">
-                {value.language}
-              </span>
-            )}
-          </div>
-        )}
-        <pre className="overflow-x-auto bg-gray-950 p-4 text-sm text-gray-100">
-          <code>{value.code}</code>
-        </pre>
-      </div>
-    ),
+    pteCode: ({ value }: { value: { language?: string; filename?: string; code?: string | { language?: string; filename?: string; code?: string } } }) => {
+      // Handle both old (flat) and new (nested code object from @sanity/code-input) data shapes
+      const codeObj = typeof value.code === 'object' && value.code !== null ? value.code : null
+      const language = codeObj?.language ?? value.language
+      const filename = codeObj?.filename ?? value.filename
+      const codeStr = codeObj?.code ?? (typeof value.code === 'string' ? value.code : '')
+
+      return (
+        <div className="my-6 overflow-hidden rounded-lg border border-border">
+          {(filename || language) && (
+            <div className="flex items-center gap-2 border-b border-border bg-gray-50 px-4 py-2 dark:bg-gray-900">
+              {filename && (
+                <span className="text-xs font-medium text-foreground">
+                  {filename}
+                </span>
+              )}
+              {language && (
+                <span className="ml-auto text-xs text-muted">
+                  {language}
+                </span>
+              )}
+            </div>
+          )}
+          <pre className="overflow-x-auto bg-gray-950 p-4 text-sm text-gray-100">
+            <code>{codeStr}</code>
+          </pre>
+        </div>
+      )
+    },
   },
   marks: {
     link: ({ children, value }: { children: React.ReactNode; value?: { href?: string } }) => (
@@ -91,13 +118,19 @@ const components: PortableTextComponents = {
     ),
   },
   block: {
-    h2: ({ children }: { children?: React.ReactNode }) => (
-      <h2 className="mb-4 mt-10 text-2xl font-bold tracking-tight text-foreground">
+    h2: ({ children, value }: { children?: React.ReactNode; value: PTBlockValue }) => (
+      <h2
+        id={headingId(value)}
+        className="mb-4 mt-10 scroll-mt-24 text-2xl font-bold tracking-tight text-foreground"
+      >
         {children}
       </h2>
     ),
-    h3: ({ children }: { children?: React.ReactNode }) => (
-      <h3 className="mb-3 mt-8 text-xl font-semibold text-foreground">
+    h3: ({ children, value }: { children?: React.ReactNode; value: PTBlockValue }) => (
+      <h3
+        id={headingId(value)}
+        className="mb-3 mt-8 scroll-mt-24 text-xl font-semibold text-foreground"
+      >
         {children}
       </h3>
     ),
